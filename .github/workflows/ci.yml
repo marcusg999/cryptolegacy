@@ -1,0 +1,129 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+# Spec §11: "Dependency pinning and lockfile integrity enforced in CI — this is
+# a supply-chain target."
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Lint, types, crypto checks and unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      # `npm ci` fails if package.json and the lockfile disagree, which is the
+      # lockfile-integrity requirement.
+      - name: Install (lockfile enforced)
+        run: npm ci
+
+      - name: Every dependency is pinned to an exact version
+        run: |
+          node -e '
+            const pkg = require("./package.json");
+            const loose = Object.entries({ ...pkg.dependencies, ...pkg.devDependencies })
+              .filter(([, v]) => /^[\^~]|\*|x|latest/.test(v));
+            if (loose.length) {
+              console.error("Unpinned dependencies — a supply-chain target must not float:");
+              for (const [n, v] of loose) console.error(`  ${n}: ${v}`);
+              process.exit(1);
+            }
+            console.log("All dependencies pinned exactly.");
+          '
+
+      - name: Wordlist digest and integrity
+        run: npm run verify:wordlist
+
+      - name: Crypto leak check
+        run: npm run check:leaks
+
+      - name: Types
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests
+        run: npm test
+
+      # Production dependencies must be clean. Dev-only advisories are reported
+      # but do not fail the build, since they do not reach a user's browser.
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Audit all dependencies (informational)
+        run: npm audit || true
+
+  database:
+    name: RLS policy suite
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install PostgreSQL client and pgTAP
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client postgresql-16-pgtap
+
+      # Runs against a plain PostgreSQL 16 with scripts/local-auth-harness.sql
+      # standing in for the parts of Supabase the schema depends on. No Docker
+      # and no Supabase CLI needed; every policy is still exercised.
+      - name: Apply migrations and run the pgTAP suite
+        env:
+          PGHOST: localhost
+          PGPORT: '5432'
+          PGUSER: postgres
+          PGPASSWORD: postgres
+        run: bash scripts/test-db.sh
+
+  build:
+    name: Production build gate
+    runs-on: ubuntu-latest
+    needs: [verify, database]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+
+      # Spec §10. Without CRYPTO_REVIEW_ATTESTATION this step fails by design,
+      # and that failure is the gate working rather than a broken pipeline.
+      # Set the secret once the external review is recorded; see REVIEW_GATE.md.
+      - name: Build
+        env:
+          CRYPTO_REVIEW_ATTESTATION: ${{ secrets.CRYPTO_REVIEW_ATTESTATION }}
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder
+          NEXT_PUBLIC_APP_ORIGIN: https://placeholder.example
+          NEXT_PUBLIC_WEBAUTHN_RP_ID: placeholder.example
+        run: npm run build

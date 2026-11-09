@@ -76,7 +76,7 @@ describe('open — adversarial cases', () => {
     const { key, blob } = await makeBlob();
     for (let i = 0; i < blob.ciphertext.length - GCM_TAG_BYTES; i += 1) {
       const tampered = Uint8Array.from(blob.ciphertext);
-      tampered[i] ^= 0x01;
+      tampered[i] = (tampered[i] as number) ^ 0x01;
       await expect(open(key, { ...blob, ciphertext: tampered }, AAD)).rejects.toBeInstanceOf(
         AeadError,
       );
@@ -87,7 +87,7 @@ describe('open — adversarial cases', () => {
     const { key, blob } = await makeBlob();
     for (let i = blob.ciphertext.length - GCM_TAG_BYTES; i < blob.ciphertext.length; i += 1) {
       const tampered = Uint8Array.from(blob.ciphertext);
-      tampered[i] ^= 0x80;
+      tampered[i] = (tampered[i] as number) ^ 0x80;
       await expect(open(key, { ...blob, ciphertext: tampered }, AAD)).rejects.toBeInstanceOf(
         AeadError,
       );
@@ -97,7 +97,7 @@ describe('open — adversarial cases', () => {
   it('rejects a tampered IV', async () => {
     const { key, blob } = await makeBlob();
     const iv = Uint8Array.from(blob.iv);
-    iv[0] ^= 0xff;
+    iv[0] = (iv[0] as number) ^ 0xff;
     await expect(open(key, { ...blob, iv }, AAD)).rejects.toBeInstanceOf(AeadError);
   });
 
@@ -138,7 +138,7 @@ describe('open — adversarial cases', () => {
     const { key, blob } = await makeBlob();
     const other = await generateAesKey();
     const tampered = Uint8Array.from(blob.ciphertext);
-    tampered[0] ^= 1;
+    tampered[0] = (tampered[0] as number) ^ 1;
 
     const messages = new Set<string>();
     for (const attempt of [

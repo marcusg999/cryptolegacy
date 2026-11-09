@@ -167,7 +167,7 @@ describe('unlockVault — negative cases', () => {
     // hunting for a transcription error that does not exist.
     const { keyRecord } = await create();
     const bytes = Buffer.from(keyRecord.wrapped_vmk.ciphertext, 'base64');
-    bytes[0] ^= 0xff;
+    bytes[0] = (bytes[0] as number) ^ 0xff;
     const damaged = {
       ...keyRecord,
       wrapped_vmk: { ...keyRecord.wrapped_vmk, ciphertext: bytes.toString('base64') },

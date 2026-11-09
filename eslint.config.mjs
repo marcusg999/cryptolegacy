@@ -1,23 +1,44 @@
-import { FlatCompat } from '@eslint/eslintrc';
+import nextCoreWebVitals from 'eslint-config-next/core-web-vitals';
+import nextTypescript from 'eslint-config-next/typescript';
 
-const compat = new FlatCompat({ baseDirectory: import.meta.dirname });
-
-export default [
-  ...compat.extends('next/core-web-vitals', 'next/typescript'),
+/**
+ * eslint-config-next ships flat config directly from Next 16, so no
+ * FlatCompat shim is needed (and the shim in fact fails on it).
+ */
+const config = [
+  { ignores: ['.next/**', 'node_modules/**', 'coverage/**', 'out/**'] },
+  ...nextCoreWebVitals,
+  ...nextTypescript,
   {
-    ignores: ['.next/**', 'node_modules/**', 'coverage/**'],
-  },
-  {
-    files: ['src/lib/crypto/**/*.ts'],
+    // The cryptographic core carries rules the rest of the app does not need.
+    // These duplicate part of scripts/check-crypto-leaks.mjs on purpose: this is
+    // the fast signal in the editor, that one is the gate in CI.
+    files: ['src/lib/crypto/**/*.ts', 'src/lib/custody/**/*.ts'],
     rules: {
-      // The crypto module must stay free of logging. scripts/check-crypto-leaks.mjs
-      // enforces this in CI as well; this is the fast local signal.
       'no-console': 'error',
       'no-restricted-globals': [
         'error',
         { name: 'localStorage', message: 'Key material must never be persisted.' },
         { name: 'sessionStorage', message: 'Key material must never be persisted.' },
+        { name: 'indexedDB', message: 'Key material must never be persisted.' },
+      ],
+      'no-restricted-properties': [
+        'error',
+        {
+          object: 'window',
+          property: 'localStorage',
+          message: 'Key material must never be persisted.',
+        },
       ],
     },
   },
-];
+  {
+    files: ['tests/**/*.ts', 'scripts/**/*.mjs'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      'no-console': 'off',
+    },
+  },
+]
+
+export default config;

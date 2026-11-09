@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { AeadError, generateExtractableAesKey, exportRawKey, importAesKey } from '@/lib/crypto/aead';
 import { AAD, ENVELOPE_VERSION, KDF_PROFILE_TEST, SENTINEL_PLAINTEXT } from '@/lib/crypto/constants';
-import { deriveKeyEncryptionKey, newKdfSalt } from '@/lib/crypto/kdf';
+import { deriveKeyEncryptionKey } from '@/lib/crypto/kdf';
 import {
   createVaultMasterKey,
   openItem,
@@ -118,7 +118,7 @@ describe('sentinel verification', () => {
     const k = await kek();
     const { sentinel } = await createVaultMasterKey(k, VAULT, KEYREC);
     const ct = Uint8Array.from(sentinel.ciphertext);
-    ct[0] ^= 0xff;
+    ct[0] = (ct[0] as number) ^ 0xff;
     await expect(verifySentinel(k, { ...sentinel, ciphertext: ct }, VAULT, KEYREC)).resolves.toBe(
       false,
     );
@@ -254,13 +254,13 @@ describe('item sealing', () => {
     const sealed = await sealItem(key, utf8ToBytes('alpha'), VAULT, ITEM);
 
     const payloadCt = Uint8Array.from(sealed.payload.ciphertext);
-    payloadCt[0] ^= 0x01;
+    payloadCt[0] = (payloadCt[0] as number) ^ 0x01;
     await expect(
       openItem(key, { ...sealed, payload: { ...sealed.payload, ciphertext: payloadCt } }, VAULT, ITEM),
     ).rejects.toBeInstanceOf(AeadError);
 
     const dekCt = Uint8Array.from(sealed.wrappedDek.ciphertext);
-    dekCt[0] ^= 0x01;
+    dekCt[0] = (dekCt[0] as number) ^ 0x01;
     await expect(
       openItem(key, { ...sealed, wrappedDek: { ...sealed.wrappedDek, ciphertext: dekCt } }, VAULT, ITEM),
     ).rejects.toBeInstanceOf(AeadError);

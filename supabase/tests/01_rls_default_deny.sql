@@ -92,16 +92,20 @@ select is_empty(
   'every function in our schemas pins an empty search_path'
 );
 
--- No table may be left without an owner-scoped SELECT policy that references
--- either auth.uid() or the ownership helper. A policy of `using (true)` would
--- pass the "has a policy" check above while exposing everything.
+-- No policy may grant access without checking who is asking. A policy of
+-- `using (true)` would pass the "has a policy" check above while exposing
+-- everything, which is precisely the mistake this catches.
+--
+-- An outright `using (false)` deny-all is allowed, because it grants nothing at
+-- all — it is stricter than an identity check, not looser.
 select is_empty(
   $$ select n.nspname || '.' || c.relname || ':' || p.polname
        from pg_policy p
        join pg_class c on c.oid = p.polrelid
        join pg_namespace n on n.oid = c.relnamespace
       where n.nspname in ('account', 'vault', 'custody')
-        and pg_get_expr(coalesce(p.polqual, p.polwithcheck), p.polrelid) !~ 'auth\.uid|owns_vault' $$,
+        and pg_get_expr(coalesce(p.polqual, p.polwithcheck), p.polrelid) !~ 'auth\.uid|owns_vault'
+        and pg_get_expr(coalesce(p.polqual, p.polwithcheck), p.polrelid) !~ '^\(?false\)?$' $$,
   'no policy in account/vault/custody grants access without checking the caller identity'
 );
 

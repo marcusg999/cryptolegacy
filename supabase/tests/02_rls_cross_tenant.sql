@@ -7,7 +7,7 @@
 -- vault. This is the file that would have caught the bug.
 -- ---------------------------------------------------------------------------
 begin;
-select plan(28);
+select plan(30);
 
 -- Fixtures, created as superuser so RLS does not interfere with setup.
 select tests.clear_authentication();
@@ -185,6 +185,31 @@ select is(
   (select count(*) from vault.items where id = '00000000-0000-4000-8000-0000000a17e1')::int,
   1,
   '...and deleted nothing'
+);
+
+-- The preceding block cleared authentication in order to verify the row was
+-- untouched, so sign back in before asserting anything about a user's access.
+select tests.authenticate_as('00000000-0000-4000-8000-00000000b0b1');
+
+-- WebAuthn challenges are minted and consumed server-side only. A client that
+-- could read or write them could replay one, which would make the passkey a
+-- formality.
+-- Denial lands at the table-privilege level: `authenticated` was never granted
+-- anything on this table, so it cannot even read it. The deny-all RLS policy on
+-- top is belt and braces — it states the intent in a place a reader of the
+-- policies will see, and it survives someone adding a grant carelessly.
+select throws_ok(
+  $$ select count(*) from account.webauthn_challenges $$,
+  '42501',
+  'permission denied for table webauthn_challenges',
+  'a signed-in user cannot read any WebAuthn challenge, including their own'
+);
+select throws_ok(
+  $$ insert into account.webauthn_challenges (user_id, purpose, challenge)
+     values ('00000000-0000-4000-8000-00000000b0b1', 'register', 'forged') $$,
+  '42501',
+  'permission denied for table webauthn_challenges',
+  'a signed-in user cannot mint their own WebAuthn challenge'
 );
 
 -- =========================================================================

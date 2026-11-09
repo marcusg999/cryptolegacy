@@ -93,7 +93,7 @@ describe('generatePassphrase', () => {
   });
 });
 
-describe('randomInt — uniformity', () => {
+describe('randomInt — rejection sampling', () => {
   it('stays in range', () => {
     for (let i = 0; i < 2000; i += 1) {
       const v = randomInt(7776);
@@ -102,17 +102,140 @@ describe('randomInt — uniformity', () => {
     }
   });
 
-  it('is not detectably biased across buckets (chi-square, 36 buckets)', () => {
+  /**
+   * The statistical test below cannot catch modulo bias, and saying otherwise
+   * would be worse than not testing for it.
+   *
+   * Measured: with 72,000 draws into 36 buckets, a modulo-biased generator
+   * produces a chi-square distribution indistinguishable from a correct one
+   * (median 35.3 against 34.3). That is unsurprising — the bias is about
+   * 7776 / 2^32 ≈ 2 parts in a million. No feasible sample size finds it.
+   *
+   * So the rejection logic is tested DIRECTLY instead, by driving the generator
+   * with known values. That proves the property exactly, rather than failing to
+   * observe its violation.
+   */
+  describe('with a driven random source', () => {
+    const RANGE = 2 ** 32;
+    const BOUND = 7776;
+    const LIMIT = RANGE - (RANGE % BOUND);
+
+    function driveWith(values: readonly number[]) {
+      const queue = [...values];
+      const original = globalThis.crypto.getRandomValues.bind(globalThis.crypto);
+      let draws = 0;
+      const stub = ((array: Uint32Array) => {
+        draws += 1;
+        const next = queue.shift();
+        if (next === undefined) throw new Error('driven source exhausted');
+        array[0] = next;
+        return array;
+      }) as typeof globalThis.crypto.getRandomValues;
+
+      Object.defineProperty(globalThis.crypto, 'getRandomValues', {
+        value: stub,
+        configurable: true,
+        writable: true,
+      });
+      return {
+        restore: () => {
+          Object.defineProperty(globalThis.crypto, 'getRandomValues', {
+            value: original,
+            configurable: true,
+            writable: true,
+          });
+        },
+        draws: () => draws,
+      };
+    }
+
+    it('rejects a draw at or above the limit and retries', () => {
+      // LIMIT itself is the first value that must be discarded. If the
+      // implementation used a bare modulo it would return LIMIT % BOUND here.
+      const driver = driveWith([LIMIT, 5]);
+      try {
+        expect(randomInt(BOUND)).toBe(5);
+        expect(driver.draws()).toBe(2);
+      } finally {
+        driver.restore();
+      }
+      expect(LIMIT % BOUND).toBe(0); // what the buggy version would have returned
+    });
+
+    it('rejects every out-of-range draw, however many in a row', () => {
+      // The rejection window is [LIMIT, 2^32). It is only RANGE % BOUND wide —
+      // 4096 values here — so a test value must stay inside it or it wraps in
+      // the Uint32Array and silently becomes an acceptable draw.
+      const windowSize = RANGE - LIMIT;
+      expect(windowSize).toBeGreaterThan(2);
+      const driver = driveWith([
+        LIMIT,
+        LIMIT + 1,
+        LIMIT + Math.floor(windowSize / 2),
+        RANGE - 1,
+        1234,
+      ]);
+      try {
+        expect(randomInt(BOUND)).toBe(1234);
+        expect(driver.draws()).toBe(5);
+      } finally {
+        driver.restore();
+      }
+    });
+
+    it('accepts the largest in-range draw', () => {
+      const driver = driveWith([LIMIT - 1]);
+      try {
+        expect(randomInt(BOUND)).toBe((LIMIT - 1) % BOUND);
+        expect(driver.draws()).toBe(1);
+      } finally {
+        driver.restore();
+      }
+    });
+
+    it('accepts zero', () => {
+      const driver = driveWith([0]);
+      try {
+        expect(randomInt(BOUND)).toBe(0);
+      } finally {
+        driver.restore();
+      }
+    });
+
+    it('gives up rather than looping forever on a source that never cooperates', () => {
+      const driver = driveWith(Array.from({ length: 2000 }, () => RANGE - 1));
+      try {
+        expect(() => randomInt(BOUND)).toThrow(/rejection sampling failed to terminate/);
+      } finally {
+        driver.restore();
+      }
+    });
+  });
+
+  /**
+   * A coarse sanity check on the real generator. It catches gross failures — a
+   * truncated range, a stuck value, a degenerate wordlist — which produce a
+   * chi-square in the thousands. It does NOT catch modulo bias; see above.
+   *
+   * Threshold: 300 measured runs of the correct generator peaked at 62.4; a
+   * generator reaching only 90% of the list scores ~7400. 150 sits far above
+   * the former and far below the latter, so this cannot flake and still fails
+   * loudly on the bug it is for.
+   */
+  it('shows no gross departure from uniformity (chi-square, 36 buckets)', () => {
     const buckets = 36;
     const draws = 72_000;
     const counts = new Array<number>(buckets).fill(0);
     for (let i = 0; i < draws; i += 1) {
-      counts[Math.floor(randomInt(WORDLIST_SIZE) / (WORDLIST_SIZE / buckets))] += 1;
+      const bucket = Math.floor(randomInt(WORDLIST_SIZE) / (WORDLIST_SIZE / buckets));
+      counts[bucket] = (counts[bucket] as number) + 1;
     }
     const expected = draws / buckets;
     const chi2 = counts.reduce((acc, c) => acc + (c - expected) ** 2 / expected, 0);
-    // 35 df: the 0.999 critical value is ~66.6; a biased modulo generator blows past this.
-    expect(chi2).toBeLessThan(80);
+    expect(chi2).toBeLessThan(150);
+    // Every bucket must be reached at all: a generator covering part of the
+    // list is the failure this is really for.
+    expect(Math.min(...counts)).toBeGreaterThan(expected * 0.8);
   });
 
   it('handles the degenerate and invalid bounds', () => {
