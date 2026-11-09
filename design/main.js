@@ -21,12 +21,29 @@ const frames = new Array(FRAME_COUNT);
 let framesReady = 0;
 let currentFrame = -1;
 
+/* Draw the requested frame, or the nearest one that has actually decoded.
+   Bailing out when a frame is not ready leaves whatever was drawn last on
+   screen — which during early scroll can be a frame from a completely
+   different depth, so the descent appears to stall and then jump. Falling
+   back to the nearest decoded neighbour keeps the scrub monotonic while the
+   sequence is still filling in. */
+function nearestReady(i) {
+  if (frames[i] && frames[i].complete && frames[i].naturalWidth) return i;
+  for (let d = 1; d < FRAME_COUNT; d += 1) {
+    const lo = i - d, hi = i + d;
+    if (lo >= 0 && frames[lo] && frames[lo].complete && frames[lo].naturalWidth) return lo;
+    if (hi < FRAME_COUNT && frames[hi] && frames[hi].complete && frames[hi].naturalWidth) return hi;
+  }
+  return -1;
+}
+
 function drawFrame(i) {
-  const img = frames[i];
-  if (!img || !img.complete || i === currentFrame) return;
-  currentFrame = i;
+  if (framesReady === 0) return;
+  const use = nearestReady(i);
+  if (use < 0 || use === currentFrame) return;
+  currentFrame = use;
   // Cover-fit: the canvas backing store is fixed, the CSS box is not.
-  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  ctx.drawImage(frames[use], 0, 0, canvas.width, canvas.height);
 }
 
 function preload() {
@@ -42,7 +59,10 @@ function preload() {
     img.decoding = 'async';
     img.src = FRAME_URL(i);
     img.onload = () => {
-      framesReady++;
+      framesReady += 1;
+      /* Redraw on each arrival while the sequence is sparse, so an early
+         scroll resolves to a better frame as neighbours land. */
+      if (framesReady < FRAME_COUNT) { currentFrame = -1; onScroll(); }
       if (i === 0) drawFrame(0);
     };
     frames[i] = img;
