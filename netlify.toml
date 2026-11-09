@@ -1,0 +1,14 @@
+[build]
+  command = "npm run ci && npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+  # Fail the build on a lockfile that does not match package.json.
+  NPM_FLAGS = "--ci"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Netlify must never see the service-role key. It is not referenced by the build,
+# and scripts/check-crypto-leaks.mjs asserts it cannot reach client code.
