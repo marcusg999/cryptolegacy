@@ -101,7 +101,10 @@ npm run db:test
 
 It uses the Supabase CLI when Docker is available, and otherwise falls back to a
 plain PostgreSQL 16 instance plus `scripts/local-auth-harness.sql` — no Docker
-required, and every policy is still exercised. 80 pgTAP assertions.
+required, and every policy is still exercised. 80 pgTAP assertions, plus a
+round-trip check that pushes real key material and ciphertext through a real
+database and back, because nothing else covers the `bytea` conversion and a
+fault there would corrupt ciphertext silently.
 
 ---
 

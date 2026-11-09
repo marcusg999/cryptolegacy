@@ -96,6 +96,12 @@ jobs:
       # Runs against a plain PostgreSQL 16 with scripts/local-auth-harness.sql
       # standing in for the parts of Supabase the schema depends on. No Docker
       # and no Supabase CLI needed; every policy is still exercised.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+
       - name: Apply migrations and run the pgTAP suite
         env:
           PGHOST: localhost
@@ -103,6 +109,17 @@ jobs:
           PGUSER: postgres
           PGPASSWORD: postgres
         run: bash scripts/test-db.sh
+
+      # Real cryptographic output crossing a real database and coming back.
+      # Neither the unit tests nor pgTAP exercise the bytea conversion, and a
+      # fault there would corrupt ciphertext silently.
+      - name: Crypto round trip through the database
+        env:
+          PGHOST: localhost
+          PGPORT: '5432'
+          PGUSER: postgres
+          PGPASSWORD: postgres
+        run: npm run test:roundtrip
 
   build:
     name: Production build gate

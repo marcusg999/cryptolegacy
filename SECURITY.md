@@ -303,6 +303,7 @@ checks the digest *and* a vocabulary-richness floor for that reason.
 | `scripts/check-review-gate.mjs` | A production build before the cryptographic review is recorded. |
 | `npm test` | 212 assertions including the adversarial crypto cases. |
 | `scripts/test-db.sh` | 80 pgTAP assertions; every RLS policy with its negative case. |
+| `scripts/test-roundtrip.mjs` | Real key material and ciphertext crossing a real PostgreSQL instance and back, including that a flipped byte is caught by the GCM tag and that no plaintext or passphrase word survives in a dump. |
 
 A finding from the leak check is a potential disclosure of key material. Do not
 suppress one without understanding it.
