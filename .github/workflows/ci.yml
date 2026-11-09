@@ -125,9 +125,16 @@ jobs:
         run: npm run test:roundtrip
 
   build:
-    name: Production build gate
+    name: Build and review gate
     runs-on: ubuntu-latest
     needs: [verify, database]
+
+    # The `secrets` context is not available in a step-level `if`, so presence
+    # is mapped to a boolean here, at job level, where it is. The value itself
+    # is not exposed to every step.
+    env:
+      HAS_ATTESTATION: ${{ secrets.CRYPTO_REVIEW_ATTESTATION != '' }}
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -136,10 +143,56 @@ jobs:
           cache: npm
       - run: npm ci
 
-      # Spec §10. Without CRYPTO_REVIEW_ATTESTATION this step fails by design,
-      # and that failure is the gate working rather than a broken pipeline.
-      # Set the secret once the external review is recorded; see REVIEW_GATE.md.
-      - name: Build
+      # Two separate properties, checked separately.
+      #
+      # Running `npm run build` here and letting it fail when no attestation is
+      # configured would leave this check permanently red, which is the worst
+      # possible signal: a genuine compilation regression would look identical
+      # to the gate doing its job, and nobody would notice either.
+      #
+      # So: assert the gate actually refuses, then assert the app actually
+      # compiles. Neither of these deploys anything — the artifact is discarded
+      # with the runner. The gate that matters is the one in `npm run build`,
+      # which Netlify runs on every deploy and which is NOT bypassed here.
+
+      - name: The review gate refuses a build with no attestation
+        if: env.HAS_ATTESTATION != 'true'
+        env:
+          CRYPTO_REVIEW_ATTESTATION: ''
+        run: |
+          if npm run gate --silent; then
+            echo "::error::The review gate allowed a build with no attestation recorded."
+            echo "scripts/check-review-gate.mjs must fail closed. See REVIEW_GATE.md and spec §10."
+            exit 1
+          fi
+          echo "✓ The gate refuses a production build until a cryptographic review is recorded."
+
+      - name: The review gate rejects a malformed attestation
+        if: env.HAS_ATTESTATION != 'true'
+        env:
+          CRYPTO_REVIEW_ATTESTATION: 'not-a-real-attestation'
+        run: |
+          if npm run gate --silent; then
+            echo "::error::The review gate accepted a malformed attestation."
+            exit 1
+          fi
+          echo "✓ The gate rejects an attestation that is not <reviewer>|<date>|<commit>."
+
+      # Compilation only. Deliberately `next build` and not `npm run build`, so
+      # this step cannot be mistaken for, or turned into, a production build.
+      - name: The application compiles
+        if: env.HAS_ATTESTATION != 'true'
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder
+          NEXT_PUBLIC_APP_ORIGIN: https://placeholder.example
+          NEXT_PUBLIC_WEBAUTHN_RP_ID: placeholder.example
+        run: npx next build
+
+      # Once a review is on record, run the real gated build, exactly as a
+      # deploy would.
+      - name: Production build
+        if: env.HAS_ATTESTATION == 'true'
         env:
           CRYPTO_REVIEW_ATTESTATION: ${{ secrets.CRYPTO_REVIEW_ATTESTATION }}
           NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co

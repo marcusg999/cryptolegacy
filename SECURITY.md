@@ -300,7 +300,7 @@ checks the digest *and* a vocabulary-richness floor for that reason.
 |---|---|
 | `scripts/check-crypto-leaks.mjs` | `console.log`, `fetch`, telemetry or storage in the crypto module; a secret-shaped identifier reaching a sink; the service-role key in client code; a secret behind `NEXT_PUBLIC_`; the test KDF profile outside tests; weakened Argon2id parameters; AES-GCM used outside the one module that generates IVs. |
 | `scripts/verify-wordlist.mjs` | A substituted or degenerate wordlist. |
-| `scripts/check-review-gate.mjs` | A production build before the cryptographic review is recorded. |
+| `scripts/check-review-gate.mjs` | A production build before the cryptographic review is recorded. CI asserts it refuses both an empty and a malformed attestation. |
 | `npm test` | 212 assertions including the adversarial crypto cases. |
 | `scripts/test-db.sh` | 80 pgTAP assertions; every RLS policy with its negative case. |
 | `scripts/test-roundtrip.mjs` | Real key material and ciphertext crossing a real PostgreSQL instance and back, including that a flipped byte is caught by the GCM tag and that no plaintext or passphrase word survives in a dump. |

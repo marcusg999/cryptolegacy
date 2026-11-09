@@ -90,6 +90,24 @@ what has changed since.
   larger cryptographic surface and the spec requires a separate external
   cryptographic review for them regardless.
 
+## What CI does with this
+
+CI does not deploy, so it checks the gate rather than submitting to it:
+
+- With no attestation configured, it asserts the gate **refuses** — both for an
+  empty value and for a malformed one — and then runs `next build` directly to
+  confirm the application still compiles.
+- With `CRYPTO_REVIEW_ATTESTATION` set as a repository secret, it runs the real
+  `npm run build`, gate included, exactly as a deploy would.
+
+The alternative — letting the `build` job fail while no review exists — would
+leave a permanently red check, and a genuine compilation regression would then
+look identical to the gate working. Nobody would notice either.
+
+The gate that actually stops a deploy is the one inside `npm run build`, which
+Netlify runs. Nothing in CI bypasses it, and nothing in CI produces an artifact
+that is deployed.
+
 ## Bypassing this gate
 
 There is no flag. Setting the attestation to something untrue is possible and is
