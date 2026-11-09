@@ -1,0 +1,21 @@
+node_modules/
+.next/
+out/
+build/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+
+# Secrets — never commit any of these.
+.env
+.env.local
+.env.*.local
+.env.production
+supabase/.temp/
+supabase/.branches/
+
+.DS_Store
+*.log
+npm-debug.log*
+.vercel
+.netlify

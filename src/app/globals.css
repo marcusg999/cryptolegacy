@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --ink: #0b1020;
+  --paper: #f7f7f4;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Print styles for the Executor Letter and the transcription sheet.          */
+/*                                                                           */
+/* These are not decoration. Spec §11 forbids a third-party script on any     */
+/* page touching decrypted content, and both of those pages do, so there is   */
+/* no PDF library in the bundle — the browser's own print pipeline produces   */
+/* the paper artefact. That makes this stylesheet the actual output format.   */
+/* ------------------------------------------------------------------------- */
+@media print {
+  :root {
+    --paper: #ffffff;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+    font-size: 11pt;
+  }
+
+  .print-sheet {
+    margin: 0;
+    padding: 0;
+    box-shadow: none !important;
+    border: none !important;
+    max-width: none;
+  }
+
+  /* Keep a custody step and its contact details on one page: an executor
+     reading half an address is worse than a page break elsewhere. */
+  .print-keep-together {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .print-page-break {
+    break-after: page;
+    page-break-after: always;
+  }
+
+  a[href]::after {
+    content: '';
+  }
+
+  @page {
+    margin: 18mm 16mm;
+  }
+}
+
+/* The passphrase display. Monospaced and generously spaced, because the user is
+   copying it onto paper by hand and a misread word is unrecoverable. */
+.passphrase-word {
+  font-variant-ligatures: none;
+  font-feature-settings: 'zero' 1;
+  letter-spacing: 0.02em;
+}
+
+/* Discourage casual selection of the displayed phrase. Honest about what this
+   is: a speed bump, not a control. A determined user can still select it, and
+   the real protection is that the phrase is never transmitted. */
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+}
