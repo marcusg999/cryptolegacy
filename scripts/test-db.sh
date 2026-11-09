@@ -14,8 +14,14 @@ DB="${DB:-civ_test_$$}"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 export PGHOST PGPORT PGUSER
 
-if command -v supabase >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
-  echo "==> Supabase CLI detected; running 'supabase test db'"
+# Use the Supabase CLI only when there is actually a Supabase project to run —
+# the binary alone is not enough, and a runner that happens to have it installed
+# would otherwise fail here rather than falling back.
+if [ -f "$ROOT/supabase/config.toml" ] \
+  && command -v supabase >/dev/null 2>&1 \
+  && docker info >/dev/null 2>&1; then
+  echo "==> Supabase CLI and project config detected; running 'supabase test db'"
+  cd "$ROOT"
   exec supabase test db
 fi
 
