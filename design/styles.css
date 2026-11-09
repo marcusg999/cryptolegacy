@@ -1,0 +1,542 @@
+/* =========================================================================
+   Crypto Inheritance Vault — "Geological permanence"
+   Built to design/CONTRACT.md. Palette, type, layout and motion are the
+   contract's; nothing here is chosen for comfort.
+   ========================================================================= */
+
+@import url('./assets/fonts/fonts.css');
+
+:root {
+  /* Contract palette. Exact hexes, no improvisation. */
+  --abyss:   #04070C;
+  --bed-1:   #0A1320;
+  --bed-2:   #0F1E2E;
+  --bed-3:   #152838;
+  --ink:     #DDE9F1;
+  --muted:   #65809A;
+  --glow:    #2BF5D0;
+  --cyan:    #4FC8FF;
+  --paper:   #E9DFCB;   /* reserved: the physical channel, and nothing else */
+
+  /* The tilt deepens with depth. Set per-section, read by the layout. */
+  --tilt: -2deg;
+
+  --read: 68ch;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  background: var(--abyss);
+  /* The scrub drives everything; native smoothing fights it. */
+  scroll-behavior: auto;
+}
+
+body {
+  margin: 0;
+  overflow-x: clip;
+  background: var(--abyss);
+  color: var(--ink);
+  font-family: 'Archivo', system-ui, sans-serif;
+  font-variation-settings: 'wght' 380, 'wdth' 100;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  cursor: none;            /* replaced by the dive light */
+}
+
+@media (pointer: coarse) {
+  body { cursor: auto; }
+}
+
+/* ---------- extreme scale contrast: display, or mono. Nothing between. ---- */
+
+.display {
+  font-family: 'Archivo', sans-serif;
+  font-size: clamp(3.6rem, 11vw, 11rem);
+  line-height: 0.84;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+  margin: 0;
+  font-variation-settings: 'wght' 760, 'wdth' 112;
+  text-wrap: balance;
+}
+
+.display--sm { font-size: clamp(2.6rem, 6.4vw, 5.6rem); }
+
+.mono {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.mono--glow { color: var(--glow); }
+
+/* Body copy sits at the display end of the contrast rule, never mid-size. */
+.say {
+  font-size: clamp(1.45rem, 2.3vw, 2.1rem);
+  line-height: 1.32;
+  letter-spacing: -0.015em;
+  font-variation-settings: 'wght' 360, 'wdth' 97;
+  max-width: var(--read);
+  margin: 0;
+  color: #CFDEEA;
+}
+
+.say b, .say strong {
+  font-variation-settings: 'wght' 660, 'wdth' 104;
+  color: var(--ink);
+  font-weight: inherit;
+}
+
+.say--glow { color: var(--glow); }
+
+/* ---------- the dive light (magnetic cursor) ----------------------------- */
+
+#dive-light {
+  position: fixed;
+  top: 0; left: 0;
+  width: 420px; height: 420px;
+  margin: -210px 0 0 -210px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 90;
+  background: radial-gradient(circle closest-side,
+    rgba(43, 245, 208, 0.13),
+    rgba(79, 200, 255, 0.06) 42%,
+    transparent 72%);
+  mix-blend-mode: screen;
+  will-change: transform;
+  transition: opacity .4s ease;
+}
+
+#dive-core {
+  position: fixed;
+  top: 0; left: 0;
+  width: 7px; height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%;
+  background: var(--glow);
+  box-shadow: 0 0 10px 2px rgba(43,245,208,.85);
+  pointer-events: none;
+  z-index: 91;
+  will-change: transform;
+}
+
+@media (pointer: coarse) {
+  #dive-light, #dive-core { display: none; }
+}
+
+/* ---------- the scrubbed descent ----------------------------------------- */
+
+#descent {
+  position: relative;
+  /* Long enough that the scrub has resolution under the finger. */
+  height: 560vh;
+}
+
+#descent-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#descent-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Scale slightly so the pointer-parallax never exposes an edge. */
+  transform: scale(1.06);
+  will-change: transform;
+}
+
+/* Runtime grain. See makeGrain() in main.js for why it is not in the frames. */
+/* inset:0, not a 200% oversized layer. The plate tiles, so covering four
+   times the viewport bought nothing and cost ~7 fps of compositing during the
+   scrub, which is the one moment the page cannot afford to drop frames. */
+.grain {
+  position: absolute;
+  inset: 0;
+  background-repeat: repeat;
+  opacity: .055;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 2;
+  contain: strict;
+}
+
+/* Depth gauge, pinned to the stage. */
+.gauge {
+  position: absolute;
+  right: clamp(1rem, 3vw, 3rem);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  z-index: 4;
+}
+
+.gauge__rail {
+  width: 1px;
+  height: min(46vh, 380px);
+  background: linear-gradient(to bottom,
+    rgba(221,233,241,.28), rgba(221,233,241,.06));
+  position: relative;
+}
+
+.gauge__bug {
+  position: absolute;
+  left: -3px;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--glow);
+  box-shadow: 0 0 12px 3px rgba(43,245,208,.6);
+  will-change: transform;
+}
+
+.gauge__read {
+  writing-mode: vertical-rl;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Staged strata captions inside the pinned descent. */
+.stratum {
+  position: absolute;
+  z-index: 3;
+  max-width: min(46ch, 78vw);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.stratum__rule {
+  height: 1px;
+  background: linear-gradient(to right, var(--glow), transparent);
+  margin-bottom: 1.1rem;
+  transform-origin: left;
+}
+
+/* Contract type rule: display, or mono. Nothing in between — so the strata
+   statements are set at display scale, not as paragraphs. */
+.stratum__say {
+  font-family: 'Archivo', sans-serif;
+  font-size: clamp(2rem, 3.6vw, 3.4rem);
+  line-height: 1.06;
+  letter-spacing: -0.028em;
+  font-variation-settings: 'wght' 420, 'wdth' 94;
+  color: var(--ink);
+  margin: 0;
+  max-width: 22ch;
+}
+.stratum__say b { font-variation-settings: 'wght' 760, 'wdth' 104; font-weight: inherit; }
+
+/* ---------- tilted strata layout ----------------------------------------- */
+/*
+   "Diagonal grid, everything off-axis" implemented the way an editorial
+   diagonal grid actually works: the GRID is cut on the tilt — section edges,
+   rules, rails and the step of each module — while running text stays level
+   enough to read. Rotating body copy 7deg is not a diagonal grid, it is just
+   rotated text, and it makes the page hostile. Display headings carry the
+   rotation, because they are short and large and read fine on an angle.
+
+   The tilt still deepens with depth, per the contract: --tilt is set per band.
+*/
+
+.band {
+  position: relative;
+  padding: clamp(5rem, 11vh, 9rem) clamp(1.4rem, 6vw, 7rem);
+  /* Angled edges: the strongest diagonal statement on the page, and it costs
+     no legibility because nothing is rotated. */
+  clip-path: polygon(0 0, 100% 3.2vw, 100% 100%, 0 calc(100% - 3.2vw));
+  margin-top: -1px;
+}
+
+.band--deep  { clip-path: polygon(0 0, 100% 4.6vw, 100% 100%, 0 calc(100% - 4.6vw)); }
+.band--last  { clip-path: polygon(0 0, 100% 5.2vw, 100% 100%, 0 100%); }
+
+.band__inner { max-width: 1180px; margin: 0 auto; }
+
+/* Modules step along the diagonal axis instead of stacking on a left margin. */
+.mod { position: relative; }
+.mod--step1 { margin-left: clamp(0rem, 6vw, 5rem); }
+.mod--step2 { margin-left: clamp(0rem, 12vw, 10rem); }
+.mod--step3 { margin-left: clamp(0rem, 18vw, 15rem); }
+
+/* Display headings are the things that actually rotate. */
+.tilted {
+  transform: rotate(var(--tilt));
+  transform-origin: left center;
+  display: inline-block;
+}
+
+/* The one object in the design that is NOT on the tilt. See the contract. */
+.level { transform: none !important; }
+
+.hair {
+  height: 1px;
+  background: linear-gradient(to right,
+    transparent, rgba(101,128,154,.55) 8%, rgba(101,128,154,.55) 82%, transparent);
+  transform: rotate(calc(var(--tilt) * 0.5));
+  transform-origin: left center;
+}
+
+/* ---------- the core rail: instrumentation, and the page's spine --------- */
+
+.rail {
+  position: fixed;
+  left: clamp(.9rem, 2.2vw, 2.2rem);
+  top: 0;
+  height: 100vh;
+  width: 54px;
+  z-index: 60;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: .7rem;
+  mix-blend-mode: screen;
+}
+
+.rail__line {
+  position: absolute;
+  left: 11px;
+  top: 12vh;
+  bottom: 12vh;
+  width: 1px;
+  background: linear-gradient(to bottom,
+    transparent, rgba(101,128,154,.42) 10%, rgba(101,128,154,.42) 90%, transparent);
+}
+
+.rail__tick {
+  position: absolute;
+  left: 4px;
+  width: 15px;
+  height: 1px;
+  background: rgba(101,128,154,.5);
+}
+
+.rail__bug {
+  position: absolute;
+  left: 7.5px;
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--glow);
+  box-shadow: 0 0 14px 3px rgba(43,245,208,.55);
+  will-change: transform;
+}
+
+.rail__label {
+  position: absolute;
+  left: 26px;
+  writing-mode: vertical-rl;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .58rem;
+  letter-spacing: .26em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+  will-change: transform;
+}
+
+@media (max-width: 900px) { .rail { display: none; } }
+
+/* ---------- the paper, the only warm thing here -------------------------- */
+
+#paper { background: linear-gradient(to bottom, var(--abyss), #060B13 60%, var(--abyss)); }
+
+.sheet {
+  background: var(--paper);
+  color: #2A2419;
+  padding: clamp(1.8rem, 4vw, 3.2rem);
+  width: min(560px, 86vw);
+  box-shadow:
+    0 2px 0 rgba(0,0,0,.25),
+    0 40px 120px -30px rgba(0,0,0,.95),
+    0 0 90px -20px rgba(233,223,203,.18);
+  position: relative;
+}
+
+.sheet::after {
+  /* Paper fibre. A real texture, not a flat fill. */
+  content: '';
+  position: absolute; inset: 0;
+  pointer-events: none;
+  opacity: .5;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(0,0,0,.035) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgba(0,0,0,.025) 0 1px, transparent 1px 4px);
+  mix-blend-mode: multiply;
+}
+
+.sheet__words {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .55rem 1.1rem;
+  margin: 1.4rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sheet__words li {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .96rem;
+  letter-spacing: .02em;
+  color: #2A2419;
+  border-bottom: 1px solid rgba(42,36,25,.3);
+  padding-bottom: .2rem;
+  display: flex;
+  gap: .5rem;
+}
+
+.sheet__words span { color: rgba(42,36,25,.4); font-size: .72rem; min-width: 1.3em; }
+
+/* ---------- entropy / split arithmetic ----------------------------------- */
+
+.calc {
+  display: grid;
+  gap: 1px;
+  background: rgba(101,128,154,.22);
+  border: 1px solid rgba(101,128,154,.22);
+  max-width: 760px;
+}
+
+.calc__row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem;
+  padding: .95rem 1.2rem;
+  background: var(--abyss);
+  align-items: baseline;
+}
+
+.calc__row--hero { background: #070D16; }
+.calc__row--hero .calc__v { color: var(--glow); }
+.calc__row--refused .calc__v { color: #FF6B5A; }
+
+.calc__v {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .9rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+/* ---------- reveal ------------------------------------------------------- */
+
+/*
+   Reveals animate `translate`, NOT `transform`.
+
+   `transform: translateY()` on a revealed element overwrites whatever rotation
+   .tilted had set, so every heading silently rendered level and the whole
+   diagonal grid disappeared. `translate` is an independent property and
+   composes with `transform`, so the two no longer fight.
+*/
+[data-reveal] {
+  opacity: 0;
+  translate: 0 26px;
+  transition: opacity .9s cubic-bezier(.16,1,.3,1), translate .9s cubic-bezier(.16,1,.3,1);
+}
+[data-reveal].in { opacity: 1; translate: 0 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] { opacity: 1; transform: none; transition: none; }
+  .stratum { opacity: 1 !important; }
+  #dive-light, #dive-core { display: none; }
+  body { cursor: auto; }
+}
+
+/* ---------- footer ------------------------------------------------------- */
+
+.foot {
+  padding: clamp(4rem,10vh,8rem) clamp(1.4rem,6vw,7rem) 5rem;
+  border-top: 1px solid rgba(101,128,154,.18);
+}
+
+
+/* ---------- narrow viewports --------------------------------------------- */
+/*
+   Below 820px the tilt is removed entirely rather than scaled down. A rotated
+   block on a 390px viewport pushes its own corners outside the layout and the
+   page gains a horizontal scrollbar — which is how the first pass broke.
+*/
+@media (max-width: 820px) {
+  :root { --tilt: 0deg !important; }
+  .band {
+    clip-path: polygon(0 0, 100% 1.6vw, 100% 100%, 0 calc(100% - 1.6vw));
+    padding-left: 1.3rem;
+    padding-right: 1.3rem;
+  }
+  .tilted { transform: none; display: block; }
+  .hair { transform: none; }
+  .mod--step1, .mod--step2, .mod--step3 { margin-left: 0; }
+  .display { font-size: clamp(2.7rem, 13vw, 4.2rem); }
+  .display--sm { font-size: clamp(2.1rem, 10vw, 3.2rem); }
+  .say { font-size: clamp(1.15rem, 4.6vw, 1.5rem); }
+  .stratum { max-width: 86vw; }
+  .calc__row { grid-template-columns: 1fr; gap: .25rem; }
+  /* Three columns of monospaced words overflow a 390px sheet — the twelfth
+     word was being clipped, which on this page of all pages is the wrong
+     detail to get wrong. */
+  .sheet__words { grid-template-columns: repeat(2, 1fr); }
+}
+
+
+/* ---------- sonar contact: the floor's visual subject --------------------- */
+
+.contact {
+  position: absolute;
+  right: clamp(3rem, 16vw, 15rem);
+  top: 46%;
+  width: 0; height: 0;
+  z-index: 3;
+  opacity: 0;
+  will-change: opacity;
+}
+
+.contact__core {
+  position: absolute;
+  left: -5px; top: -5px;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--glow);
+  box-shadow: 0 0 22px 6px rgba(43,245,208,.7);
+}
+
+.contact__ring {
+  position: absolute;
+  left: 0; top: 0;
+  width: 0; height: 0;
+  border-radius: 50%;
+  border: 1px solid var(--glow);
+  animation: ping 4.5s var(--d) infinite cubic-bezier(.22,.61,.36,1);
+}
+
+@keyframes ping {
+  0%   { width: 0;     height: 0;     margin: 0 0 0 0;         opacity: .85; }
+  70%  { opacity: .12; }
+  100% { width: 420px; height: 420px; margin: -210px 0 0 -210px; opacity: 0; }
+}
+
+.contact__tag {
+  position: absolute;
+  left: 20px; top: -8px;
+  white-space: nowrap;
+  color: var(--glow);
+  opacity: .85;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact__ring { animation: none; width: 150px; height: 150px; margin: -75px 0 0 -75px; opacity: .2; }
+}
+
+@media (max-width: 820px) {
+  .contact { right: 12vw; top: 30%; }
+  @keyframes ping {
+    0%   { width: 0; height: 0; margin: 0; opacity: .85; }
+    100% { width: 220px; height: 220px; margin: -110px 0 0 -110px; opacity: 0; }
+  }
+}

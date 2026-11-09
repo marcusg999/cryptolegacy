@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crypto Inheritance Vault — the record outlasts you</title>
+<meta name="description" content="A zero-knowledge vault so your cryptocurrency does not die with you. The passphrase never leaves your browser.">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+
+<aside class="rail" aria-hidden="true">
+  <div class="rail__line"></div>
+  <div class="rail__tick" style="top:12vh"></div>
+  <div class="rail__tick" style="top:34vh"></div>
+  <div class="rail__tick" style="top:56vh"></div>
+  <div class="rail__tick" style="top:78vh"></div>
+  <div class="rail__bug" id="rail-bug"></div>
+  <div class="rail__label" id="rail-label">0 m &middot; surface</div>
+</aside>
+
+<div id="dive-light" aria-hidden="true"></div>
+<div id="dive-core" aria-hidden="true"></div>
+
+<!-- =====================================================================
+     THE DESCENT — pinned, scrubbed frame sequence, staged strata captions.
+     Two of the three rolled techniques live here; the third (kinetic type)
+     runs across the whole document.
+     ===================================================================== -->
+<section id="descent" aria-label="Descent through the sediment record">
+  <div id="descent-stage">
+    <canvas id="descent-canvas" width="1280" height="720" aria-hidden="true"></canvas>
+
+
+    <!-- Stratum 0 — the hero. Lives inside the pin so the type is already
+         compressing before the first caption arrives. -->
+    <div class="stratum" data-stratum="0" style="left:clamp(1.4rem,6vw,7rem);top:50%;transform:translateY(-50%)">
+      <p class="mono">Crypto Inheritance Vault</p>
+      <h1 class="display" id="hero-type" style="margin-top:1.2rem">
+        The record<br>outlasts<br>you
+      </h1>
+      <p class="say" style="margin-top:2rem;max-width:40ch">
+        Four bitcoin behind a forgotten passphrase is gone forever. Not frozen,
+        not delayed — <b>gone</b>. No court, lawyer or exchange can retrieve it.
+      </p>
+      <p class="mono" style="margin-top:2.4rem">Scroll to descend ↓</p>
+    </div>
+
+    <div class="stratum" data-stratum="1" style="left:clamp(1.4rem,6vw,7rem);top:22%">
+      <div class="stratum__rule"></div>
+      <p class="mono mono--glow">0 m &middot; the surface</p>
+      <p class="stratum__say" style="margin-top:.9rem">
+        A house does not vanish because nobody knew about it. <b>The county recorder knows.</b>
+      </p>
+    </div>
+
+    <div class="stratum" data-stratum="2" style="right:clamp(1.4rem,6vw,7rem);top:30%;text-align:right">
+      <div class="stratum__rule" style="background:linear-gradient(to left,var(--glow),transparent)"></div>
+      <p class="mono mono--glow">340 m &middot; below the light</p>
+      <p class="stratum__say" style="margin-top:.9rem;margin-left:auto">
+        An unclaimed bank account escheats to the state and waits. <b>It is patient.</b>
+      </p>
+    </div>
+
+    <div class="stratum" data-stratum="3" style="left:clamp(1.4rem,6vw,7rem);top:58%">
+      <div class="stratum__rule"></div>
+      <p class="mono mono--glow">2 900 m &middot; the unconformity</p>
+      <p class="stratum__say" style="margin-top:.9rem">
+        Crypto is the only asset class where death means <b>permanent, total, unrecoverable loss.</b>
+      </p>
+    </div>
+
+    <div class="stratum" data-stratum="4" style="left:clamp(1.4rem,6vw,7rem);bottom:12vh;max-width:min(72ch,88vw)">
+      <p class="mono mono--glow">4 850 m &middot; the floor &middot; contact</p>
+      <p class="display display--sm" style="margin-top:.8rem;white-space:nowrap" data-kinetic>
+        Still down here
+      </p>
+      <p class="say" style="margin-top:1.2rem;max-width:34ch">
+        One light, still burning, where a record was left for whoever came looking.
+      </p>
+    </div>
+
+    <!-- The climax needs a subject, not just a caption on an empty frame.
+         Sonar contact: the dive light finds the thing that was left. -->
+    <div class="contact" id="contact" aria-hidden="true">
+      <span class="contact__ring" style="--d:0s"></span>
+      <span class="contact__ring" style="--d:1.5s"></span>
+      <span class="contact__ring" style="--d:3s"></span>
+      <span class="contact__core"></span>
+      <span class="contact__tag mono">vault &middot; intact</span>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     THE TWO CHANNELS
+     ===================================================================== -->
+<section class="band" id="channels" style="--tilt:-3.1deg">
+  <div class="band__inner">
+    <p class="mono" data-reveal>I. the arrangement</p>
+    <h2 class="display display--sm tilted" style="margin-top:1.4rem" data-reveal data-kinetic>
+      Two channels.<br>Neither opens<br>anything alone.
+    </h2>
+    <div class="hair" style="margin:3.4rem 0" data-reveal></div>
+    <div class="mod mod--step1" style="display:grid;gap:clamp(2rem,5vw,5rem);grid-template-columns:repeat(auto-fit,minmax(min(100%,22rem),1fr))">
+      <div data-reveal>
+        <p class="mono mono--glow">channel one &middot; held by us</p>
+        <p class="say" style="margin-top:1rem">
+          The encrypted vault. Account access. Death verification. The audit log.
+          All of it ciphertext, and none of it any use on its own.
+        </p>
+      </div>
+      <div data-reveal style="transition-delay:.12s">
+        <p class="mono" style="color:var(--paper)">channel two &middot; held by you</p>
+        <p class="say" style="margin-top:1rem">
+          The passphrase. On paper, in a safe deposit box, your attorney's safe,
+          a steel plate. Wherever you decide — we are never told.
+        </p>
+      </div>
+    </div>
+    <p class="say mod mod--step2" style="margin-top:3.2rem" data-reveal>
+      An executor with the passphrase and no account access holds ciphertext they
+      cannot reach. A custodian with the sealed envelope cannot log in.
+      <b>Someone who compromises our entire infrastructure gets encrypted blobs.</b>
+    </p>
+  </div>
+</section>
+
+<!-- =====================================================================
+     THE PAPER — the contract's unmistakable moment.
+     The ONE unrotated, warm object on the page.
+     ===================================================================== -->
+<section class="band band--deep" id="paper" style="--tilt:-4.4deg">
+  <div class="band__inner">
+    <p class="mono" data-reveal>II. what survives</p>
+    <h2 class="display display--sm tilted" style="margin-top:1.4rem;max-width:18ch" data-reveal data-kinetic>
+      The pressure<br>did not reach<br>the paper
+    </h2>
+  </div>
+
+  <div class="level" style="display:flex;justify-content:center;margin-top:clamp(3rem,8vh,6rem)">
+    <article class="sheet" data-reveal id="sheet">
+      <p style="font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(42,36,25,.55);margin:0">
+        Vault passphrase — written copy
+      </p>
+      <p style="font-family:'Archivo',sans-serif;font-size:1.5rem;font-variation-settings:'wght' 680,'wdth' 102;margin:.7rem 0 0;line-height:1.1">
+        Twelve words. Written by hand.
+      </p>
+      <ol class="sheet__words">
+        <li><span>1</span>witch</li><li><span>2</span>collapse</li><li><span>3</span>practice</li>
+        <li><span>4</span>feed</li><li><span>5</span>shame</li><li><span>6</span>open</li>
+        <li><span>7</span>despair</li><li><span>8</span>creek</li><li><span>9</span>road</li>
+        <li><span>10</span>again</li><li><span>11</span>ice</li><li><span>12</span>least</li>
+      </ol>
+      <p style="font-family:'JetBrains Mono',monospace;font-size:.62rem;line-height:1.7;letter-spacing:.04em;color:rgba(42,36,25,.62);margin:1.6rem 0 0">
+        The sheet prints blank. You fill it in by hand, then type it back before
+        the vault is created — so the paper provably exists first. Printing the
+        words would push them through a spooler and onto a disk.
+      </p>
+    </article>
+  </div>
+
+  <div class="band__inner" style="margin-top:clamp(3rem,7vh,5rem)">
+    <p class="say" data-reveal style="margin-left:auto;text-align:right">
+      Everything else on this page is tilted, because everything else is under
+      load. <b>The paper is level.</b>
+    </p>
+  </div>
+</section>
+
+<!-- =====================================================================
+     THE ARITHMETIC — shown, not asserted.
+     ===================================================================== -->
+<section class="band band--deep" id="maths" style="--tilt:-5.6deg">
+  <div class="band__inner">
+    <p class="mono" data-reveal>III. redundancy or split</p>
+    <h2 class="display display--sm tilted" style="margin-top:1.4rem;max-width:20ch" data-reveal data-kinetic>
+      We show the arithmetic
+    </h2>
+    <p class="say" style="margin-top:2rem" data-reveal>
+      Split the phrase across custodians and two different numbers matter. The one
+      that governs is what a coalition of <b>every holder but one</b> would still
+      have to guess — because that is a house fire plus one cooperative relative.
+    </p>
+
+    <div class="calc mod mod--step1" style="margin-top:3rem" data-reveal>
+      <div class="calc__row"><span>12 words &divide; 2 parts</span><span class="calc__v">77.5 bits &middot; acceptable</span></div>
+      <div class="calc__row calc__row--hero"><span>12 words &divide; 3 parts</span><span class="calc__v">51.7 bits &middot; marginal</span></div>
+      <div class="calc__row calc__row--refused"><span>12 words &divide; 4 parts</span><span class="calc__v">38.8 bits &middot; refused</span></div>
+      <div class="calc__row"><span>15 words &divide; 3 parts</span><span class="calc__v">64.6 bits &middot; acceptable</span></div>
+      <div class="calc__row"><span>24 words &divide; 3 parts</span><span class="calc__v">103.4 bits &middot; strong</span></div>
+    </div>
+
+    <p class="say mod mod--step2" style="margin-top:2.4rem" data-reveal>
+      Below forty bits the app <b>refuses</b> rather than warns. Splitting also
+      means losing one part destroys access permanently — which makes it strictly
+      more fragile than doing nothing.
+    </p>
+  </div>
+</section>
+
+<!-- =====================================================================
+     NOT
+     ===================================================================== -->
+<section class="band band--last" id="refusals" style="--tilt:-7deg">
+  <div class="band__inner">
+    <p class="mono" data-reveal>IV. the refusals</p>
+    <h2 class="display display--sm tilted" style="margin-top:1.4rem" data-reveal data-kinetic>
+      What we will<br>not build
+    </h2>
+    <div class="mod mod--step1" style="margin-top:3rem;display:grid;gap:0;max-width:860px">
+      <div class="hair"></div>
+      <div data-reveal style="padding:1.6rem 0"><p class="say"><b>Not a will generator.</b> We store what your attorney drafts. We never draft it.</p></div>
+      <div class="hair"></div>
+      <div data-reveal style="padding:1.6rem 0"><p class="say"><b>Not a custodian.</b> We cannot hold, move or spend your cryptocurrency.</p></div>
+      <div class="hair"></div>
+      <div data-reveal style="padding:1.6rem 0"><p class="say"><b>Not a hint system.</b> No riddles, no partial phrases. Cryptography, not obscurity.</p></div>
+      <div class="hair"></div>
+      <div data-reveal style="padding:1.6rem 0"><p class="say"><b>Not able to read your vault.</b> No server-side decryption path exists. Not for support, not for law enforcement, not for us.</p></div>
+      <div class="hair"></div>
+      <div data-reveal style="padding:1.6rem 0"><p class="say"><b>Not a password reset.</b> There cannot be one. Lose the paper and the vault is unreadable by anyone, permanently.</p></div>
+      <div class="hair"></div>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <p class="mono">Crypto Inheritance Vault</p>
+  <p class="say" style="margin-top:1.4rem;max-width:52ch">
+    We check that it still works. Every year we ask you to confirm each custody
+    point is reachable, and send a dated report saying so.
+  </p>
+  <p class="mono" style="margin-top:3rem;line-height:2;color:#4A6076">
+    Not a law firm &middot; not legal advice &middot; no attorney–client relationship<br>
+    A recorded video is not a will in most states &middot; released assets still belong to the estate
+  </p>
+</footer>
+
+<script src="./main.js"></script>
+</body>
+</html>
