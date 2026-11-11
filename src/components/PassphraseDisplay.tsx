@@ -72,7 +72,7 @@ export function PassphraseDisplay({
 
       <div
         data-passphrase-region
-        className="no-select rounded-lg border-2 border-ink bg-white p-6 shadow-sm"
+        className="no-select border-2 border-[#2A3B4F] bg-[#070D16] p-6"
         onContextMenu={(e) => e.preventDefault()}
       >
         <p className="text-xs font-semibold uppercase tracking-wide text-ink/60">
@@ -90,7 +90,7 @@ export function PassphraseDisplay({
             </li>
           ))}
         </ol>
-        <p className="mt-5 border-t border-ink/10 pt-4 text-xs text-ink/60">
+        <p className="mt-5 border-t border-[#16222F] pt-4 text-xs text-ink/60">
           All lower case. Single space between words. The hyphens in words like
           <span className="font-mono"> t-shirt </span>
           are part of the word.
@@ -133,7 +133,7 @@ export function PassphraseDisplay({
         type="button"
         disabled={!acknowledged || !wroteItDown}
         onClick={onContinue}
-        className="inline-flex items-center justify-center rounded-md bg-ink px-5 py-2.5 text-sm font-medium text-paper transition hover:bg-ink-soft disabled:cursor-not-allowed disabled:opacity-40"
+        className="inline-flex items-center justify-center bg-glow px-5 py-2.5 font-mono text-[.7rem] uppercase tracking-[.16em] text-abyss transition-colors hover:bg-[#5CFADF] disabled:cursor-not-allowed disabled:opacity-35"
       >
         Next: type it back from your written copy
       </button>

@@ -53,19 +53,19 @@ export default async function VaultPage({
         <nav className="flex flex-wrap gap-2 text-sm">
           <Link
             href={`/vaults/${vaultId}/custody`}
-            className="rounded-md border border-ink/25 bg-white px-3 py-2 font-medium text-ink hover:bg-ink/5"
+            className="border border-[#2A3B4F] bg-[#070D16] px-3 py-2 font-medium text-ink hover:bg-glow/5"
           >
             Custody plan
           </Link>
           <Link
             href={`/vaults/${vaultId}/letter`}
-            className="rounded-md border border-ink/25 bg-white px-3 py-2 font-medium text-ink hover:bg-ink/5"
+            className="border border-[#2A3B4F] bg-[#070D16] px-3 py-2 font-medium text-ink hover:bg-glow/5"
           >
             Executor Letter
           </Link>
           <Link
             href={`/vaults/${vaultId}/audit`}
-            className="rounded-md border border-ink/25 bg-white px-3 py-2 font-medium text-ink hover:bg-ink/5"
+            className="border border-[#2A3B4F] bg-[#070D16] px-3 py-2 font-medium text-ink hover:bg-glow/5"
           >
             Audit log
           </Link>

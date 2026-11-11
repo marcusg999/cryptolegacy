@@ -57,7 +57,7 @@ export function TranscriptionCheck({
         data-lpignore="true"
         aria-label="Re-enter your passphrase from your written copy"
         placeholder="word word word …"
-        className="w-full rounded-md border border-ink/25 bg-white p-3 font-mono text-base text-ink shadow-sm focus:border-ink focus:outline-none focus:ring-1 focus:ring-ink"
+        className="w-full border border-[#2A3B4F] bg-[#070D16] p-3 font-mono text-base text-ink focus:border-[#2A3B4F] focus:outline-none focus:ring-1 focus:ring-ink"
       />
 
       <p className="text-xs text-ink/60">
@@ -66,7 +66,7 @@ export function TranscriptionCheck({
       </p>
 
       {showErrors ? (
-        <div className="rounded-md border border-danger/40 bg-danger/5 p-4 text-sm">
+        <div className="border border-danger/40 bg-danger/5 p-4 text-sm">
           {result.actualWordCount !== result.expectedWordCount ? (
             <p className="text-ink">
               You have entered {result.actualWordCount} words; the passphrase has{' '}
@@ -94,7 +94,7 @@ export function TranscriptionCheck({
       ) : null}
 
       {result.matches ? (
-        <div className="rounded-md border border-ok/40 bg-ok/5 p-4 text-sm text-ink">
+        <div className="border border-ok/40 bg-ok/5 p-4 text-sm text-ink">
           Matches your written copy exactly. Your paper is correct — keep it.
         </div>
       ) : null}

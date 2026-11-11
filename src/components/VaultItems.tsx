@@ -288,7 +288,7 @@ function ItemRowView({
   const stage = STAGES.find((s) => s.value === item.disclosureStage);
 
   return (
-    <li className="rounded-lg border border-ink/15 bg-white p-4 shadow-sm">
+    <li className="border border-[#1B2A3C] bg-[#070D16] p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="font-medium text-ink">{item.name}</p>

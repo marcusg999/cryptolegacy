@@ -210,7 +210,7 @@ export default function NewVaultPage() {
               onBack={() => setStep('display')}
             />
             {error ? (
-              <div className="mt-5 rounded-md border border-danger/40 bg-danger/5 p-4 text-sm text-ink">
+              <div className="mt-5 border border-danger/40 bg-danger/5 p-4 text-sm text-ink">
                 {error}
               </div>
             ) : null}
@@ -226,9 +226,9 @@ export default function NewVaultPage() {
             that makes a stolen copy of our database expensive to attack.
           </Lead>
           <div className="mt-6 max-w-md">
-            <div className="h-2 overflow-hidden rounded-full bg-ink/10">
+            <div className="h-2 overflow-hidden rounded-full bg-glow/10">
               <div
-                className="h-full rounded-full bg-ink transition-all"
+                className="h-full rounded-full bg-glow transition-all"
                 style={{ width: `${Math.round(progress * 100)}%` }}
               />
             </div>

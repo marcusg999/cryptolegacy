@@ -3,6 +3,7 @@ import { headers } from 'next/headers';
 
 import './globals.css';
 import { PersistentDisclaimer } from '@/components/PersistentDisclaimer';
+import { Reveal } from '@/components/Reveal';
 
 export const metadata: Metadata = {
   title: 'Crypto Inheritance Vault',
@@ -14,6 +15,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
+  themeColor: '#04070C',
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
@@ -23,12 +25,24 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="en">
-      <head>{nonce ? <meta property="csp-nonce" content={nonce} nonce={nonce} /> : null}</head>
+      <head>
+        {nonce ? <meta property="csp-nonce" content={nonce} nonce={nonce} /> : null}
+        {/* Self-hosted, so font-src 'self' holds. Preloaded because the display
+            face carries the page's entire first impression. */}
+        <link
+          rel="preload"
+          href="/fonts/archivo-var.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body className="min-h-screen antialiased">
         <div className="flex min-h-screen flex-col">
           <main className="flex-1">{children}</main>
           <PersistentDisclaimer />
         </div>
+        <Reveal />
       </body>
     </html>
   );
