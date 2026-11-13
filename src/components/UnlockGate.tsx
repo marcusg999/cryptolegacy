@@ -52,7 +52,7 @@ export function UnlockGate({
   if (unlocked) {
     return (
       <>
-        <div className="no-print mb-6 flex flex-wrap items-center justify-between gap-3 rounded-md border border-ok/40 bg-ok/5 px-4 py-3 text-sm">
+        <div className="no-print mb-6 flex flex-wrap items-center justify-between gap-3 border border-ok/40 bg-ok/5 px-4 py-3 text-sm">
           <span className="text-ink">
             <strong>{vaultLabel}</strong> is unlocked in this tab. It relocks after{' '}
             {Math.round(lockTimeoutSeconds / 60)} minutes idle, and immediately if you switch away
@@ -203,7 +203,7 @@ function UnlockForm({
       <Card>
         <form onSubmit={submit} className="space-y-4">
           <label className="block">
-            <span className="block text-sm font-medium text-ink">Vault passphrase</span>
+            <span className="t-mono block text-ink/80">Vault passphrase</span>
             <textarea
               value={passphrase}
               onChange={(e) => setPassphrase(e.target.value)}
@@ -215,16 +215,16 @@ function UnlockForm({
               data-1p-ignore
               data-lpignore="true"
               disabled={busy}
-              className="mt-2 w-full rounded-md border border-ink/25 bg-white p-3 font-mono text-base text-ink shadow-sm focus:border-ink focus:outline-none focus:ring-1 focus:ring-ink"
+              className="mt-2 w-full border border-[#2A3B4F] bg-[#070D16] p-3 font-mono text-base text-ink focus:border-[#2A3B4F] focus:outline-none focus:ring-1 focus:ring-ink"
               placeholder="word word word …"
             />
           </label>
 
           {busy ? (
             <div>
-              <div className="h-1.5 overflow-hidden rounded-full bg-ink/10">
+              <div className="h-1.5 overflow-hidden rounded-full bg-glow/10">
                 <div
-                  className="h-full rounded-full bg-ink transition-all"
+                  className="h-full rounded-full bg-glow transition-all"
                   style={{ width: `${Math.round(progress * 100)}%` }}
                 />
               </div>

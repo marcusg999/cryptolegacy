@@ -19,6 +19,17 @@ import { buildCsp } from '@/lib/security/csp';
 const PUBLIC_PATHS = ['/', '/sign-in', '/auth/callback', '/legal'];
 
 /**
+ * Static assets served from /public.
+ *
+ * These MUST bypass the auth gate. Without this the landing page — which is
+ * public — has its font and its descent frames redirected to /sign-in for any
+ * visitor without a session, so the one page whose job is to make the argument
+ * renders with no typeface and no imagery. The matcher at the bottom of this
+ * file excludes them too; this list is the belt to that braces.
+ */
+const STATIC_PREFIXES = ['/fonts/', '/descent/'];
+
+/**
  * Reachable while signed in but before a passkey exists. Everything else
  * redirects to enrolment: spec §5.3 makes passkeys mandatory, and a requirement
  * the user can navigate around is not a requirement.
@@ -69,7 +80,11 @@ export async function middleware(request: NextRequest) {
       PUBLIC_PATHS.includes(path) ||
       path.startsWith('/legal/') ||
       path.startsWith('/auth/') ||
-      path.startsWith('/_next/');
+      path.startsWith('/_next/') ||
+      STATIC_PREFIXES.some((prefix) => path.startsWith(prefix)) ||
+      // The component preview is development-only and 404s in production; it
+      // is reachable without a session so the design can be reviewed.
+      (process.env.NODE_ENV === 'development' && path.startsWith('/dev/'));
 
     if (!user && !isPublic) {
       const signIn = request.nextUrl.clone();
@@ -106,8 +121,16 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Everything except Next's static output and image optimiser, which are
-    // served without a nonce and need no policy of their own.
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    /*
+       Everything except /_next (static output, the image optimiser and the
+       dev HMR socket — middleware has no business on any of them, and running
+       on the socket upgrade breaks it) and files served from /public.
+
+       The trailing extension group is not belt-and-braces padding: a public
+       asset that falls through to this middleware gets redirected to /sign-in
+       for a signed-out visitor, which silently strips the font and the hero
+       imagery off the public landing page.
+    */
+    '/((?!_next/|favicon.ico|fonts/|descent/|.*\\.(?:woff2?|webp|avif|png|jpe?g|gif|svg|ico|css|js|map|txt|xml|webmanifest)$).*)',
   ],
 };

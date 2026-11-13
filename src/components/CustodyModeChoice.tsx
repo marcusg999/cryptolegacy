@@ -95,11 +95,11 @@ export function CustodyModeChoice({
         </p>
 
         {mode === 'split' ? (
-          <div className="mt-4 space-y-4 border-t border-ink/15 pt-4">
+          <div className="mt-4 space-y-4 border-t border-[#1B2A3C] pt-4">
             <label className="block">
               <span className="text-sm font-medium text-ink">How many parts?</span>
               <select
-                className="mt-2 w-full rounded-md border border-ink/25 bg-white px-3 py-2 text-sm"
+                className="mt-2 w-full border border-[#2A3B4F] bg-[#070D16] px-3 py-2 text-sm"
                 value={partCount}
                 onChange={(e) => onPartCountChange(Number(e.target.value))}
               >
@@ -133,7 +133,7 @@ function EntropyMath({
       : 'border-ok/40 bg-ok/5';
 
   return (
-    <div className={`rounded-md border-2 p-4 text-sm ${tone}`}>
+    <div className={` border-2 p-4 text-sm ${tone}`}>
       <p className="font-semibold text-ink">The arithmetic</p>
 
       <dl className="mt-3 space-y-2 text-ink/85">
@@ -172,7 +172,7 @@ function EntropyMath({
       </ul>
 
       {analysis.refused ? (
-        <p className="mt-3 rounded border border-danger/50 bg-white p-3 text-ink">
+        <p className="mt-3 rounded border border-danger/50 bg-[#070D16] p-3 text-ink">
           <strong>This split is not allowed.</strong> To split into {analysis.partCount} parts
           safely you would need at least {minimumWordsForSplit(analysis.partCount)} words
           (comfortably, {analysis.wordsNeededForStrongSplit}). You cannot lengthen an existing
@@ -224,8 +224,8 @@ function Option({
 }) {
   return (
     <div
-      className={`rounded-lg border-2 p-5 transition ${
-        selected ? 'border-ink bg-white shadow-sm' : 'border-ink/15 bg-white/60'
+      className={` border-2 p-5 transition ${
+        selected ? 'border-[#2A3B4F] bg-[#070D16] ' : 'border-[#1B2A3C] bg-[#070D16]/60'
       }`}
     >
       <label className="flex cursor-pointer items-start gap-3">

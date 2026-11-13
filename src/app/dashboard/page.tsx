@@ -45,7 +45,7 @@ export default async function DashboardPage() {
         <div className="mt-8">
           <Link
             href="/vaults/new"
-            className="inline-flex items-center justify-center rounded-md bg-ink px-5 py-2.5 text-sm font-medium text-paper hover:bg-ink-soft"
+            className="inline-flex items-center justify-center bg-glow px-5 py-2.5 text-sm font-medium text-abyss hover:bg-[#5CFADF]"
           >
             Create your first vault
           </Link>
@@ -66,7 +66,7 @@ export default async function DashboardPage() {
         </div>
         <Link
           href="/vaults/new"
-          className="inline-flex items-center justify-center rounded-md border border-ink/25 bg-white px-4 py-2 text-sm font-medium text-ink hover:bg-ink/5"
+          className="inline-flex items-center justify-center border border-[#2A3B4F] bg-[#070D16] px-4 py-2 text-sm font-medium text-ink hover:bg-glow/5"
         >
           New vault
         </Link>
@@ -114,13 +114,13 @@ export default async function DashboardPage() {
                 <div className="flex flex-wrap gap-2">
                   <Link
                     href={`/vaults/${vault.id}`}
-                    className="inline-flex items-center justify-center rounded-md bg-ink px-4 py-2 text-sm font-medium text-paper hover:bg-ink-soft"
+                    className="inline-flex items-center justify-center bg-glow px-4 py-2 text-sm font-medium text-abyss hover:bg-[#5CFADF]"
                   >
                     Open
                   </Link>
                   <Link
                     href={`/vaults/${vault.id}/custody`}
-                    className="inline-flex items-center justify-center rounded-md border border-ink/25 bg-white px-4 py-2 text-sm font-medium text-ink hover:bg-ink/5"
+                    className="inline-flex items-center justify-center border border-[#2A3B4F] bg-[#070D16] px-4 py-2 text-sm font-medium text-ink hover:bg-glow/5"
                   >
                     Custody plan
                   </Link>

@@ -55,9 +55,9 @@ export default async function AuditPage({
             <p className="text-sm text-ink/70">No entries yet.</p>
           </Card>
         ) : (
-          <div className="overflow-hidden rounded-lg border border-ink/15 bg-white shadow-sm">
+          <div className="overflow-hidden border border-[#1B2A3C] bg-[#070D16]">
             <table className="w-full text-sm">
-              <thead className="border-b border-ink/15 bg-ink/5 text-left text-xs uppercase tracking-wide text-ink/60">
+              <thead className="border-b border-[#1B2A3C] bg-glow/5 text-left text-xs uppercase tracking-wide text-ink/60">
                 <tr>
                   <th className="px-4 py-3 font-semibold">When (UTC)</th>
                   <th className="px-4 py-3 font-semibold">Action</th>
@@ -67,7 +67,7 @@ export default async function AuditPage({
               </thead>
               <tbody>
                 {rows.map((row) => (
-                  <tr key={row.id} className="border-b border-ink/10 last:border-0">
+                  <tr key={row.id} className="border-b border-[#16222F] last:border-0">
                     <td className="whitespace-nowrap px-4 py-2.5 font-mono text-xs text-ink/70">
                       {row.created_at.replace('T', ' ').slice(0, 19)}
                     </td>
