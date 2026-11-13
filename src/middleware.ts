@@ -81,10 +81,7 @@ export async function middleware(request: NextRequest) {
       path.startsWith('/legal/') ||
       path.startsWith('/auth/') ||
       path.startsWith('/_next/') ||
-      STATIC_PREFIXES.some((prefix) => path.startsWith(prefix)) ||
-      // The component preview is development-only and 404s in production; it
-      // is reachable without a session so the design can be reviewed.
-      (process.env.NODE_ENV === 'development' && path.startsWith('/dev/'));
+      STATIC_PREFIXES.some((prefix) => path.startsWith(prefix));
 
     if (!user && !isPublic) {
       const signIn = request.nextUrl.clone();
