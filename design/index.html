@@ -5,6 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Crypto Inheritance Vault — the record outlasts you</title>
 <meta name="description" content="A zero-knowledge vault so your cryptocurrency does not die with you. The passphrase never leaves your browser.">
+
+<!--
+  GitHub Pages cannot send HTTP response headers, so the app's real CSP (built
+  per request with a nonce in src/lib/security/csp.ts) is not available here.
+  This meta policy is what static hosting allows, and it is worth having on a
+  page that lives at a public URL.
+
+  What it cannot do, and no meta policy can: `frame-ancestors`, which is
+  ignored in meta and therefore leaves clickjacking unaddressed; and a
+  per-request nonce, which needs a server. That gap is one of the reasons the
+  APPLICATION is not served from Pages — see the note in design/README.md.
+
+  `style-src` keeps 'unsafe-inline' because the page uses 53 inline style
+  attributes for the tilt and reveal values. `connect-src 'none'` is accurate:
+  the page makes no fetch or XHR at all — the frame sequence loads through
+  Image(), which is img-src. `data:` is there for the runtime grain plate.
+-->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="stylesheet" href="./styles.css">
 </head>
 <body>

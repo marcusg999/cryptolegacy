@@ -41,3 +41,47 @@ python3 tools/render_descent.py
 came out of the frames: high-frequency noise is exactly what a lossy codec
 spends its bits on, and baking it in stored the same statistical texture ninety
 times. Measured FCP 136 ms, 57 fps during the scrub, zero long tasks.
+
+
+---
+
+## Published to GitHub Pages
+
+`.github/workflows/pages.yml` publishes **this directory only** to
+<https://marcusg999.github.io/cryptolegacy/> on pushes to `main` that touch
+`design/`.
+
+The workflow stages the artifact file by file rather than uploading the repo,
+so nothing reaches the public URL unless it is named there, and it asserts that
+`tools/` and `CONTRACT.md` did not come along. It also greps the staged
+`index.html` for absolute paths, because a project site is served from
+`/<repo>/` and an absolute `src="/…"` would 404 in production while working
+perfectly on a local server.
+
+### Why the application is not served here
+
+Pages is static hosting, and the app needs a server for middleware, five route
+handlers and six server components that read cookies. A static export fails on
+the first of those.
+
+The disqualifying reason is smaller and harder: **Pages cannot send HTTP
+response headers.** That removes the Content-Security-Policy, HSTS,
+`Permissions-Policy` and `Cross-Origin-Opener-Policy` the app sets, and a
+per-request CSP nonce is impossible in principle without a per-request server.
+`frame-ancestors` cannot be set from a `<meta>` tag at all, so clickjacking
+protection would simply be absent.
+
+Spec §11 requires a strict CSP on every page that touches decrypted content. A
+zero-knowledge vault served without one is not the product.
+
+### What this page gets instead
+
+A `<meta http-equiv="Content-Security-Policy">`, which is what static hosting
+allows: `default-src 'self'`, no off-origin anything, `connect-src 'none'`
+(the page makes no fetch or XHR — the frame sequence loads through `Image()`),
+`object-src 'none'` and `base-uri 'none'`.
+
+Verified enforced rather than merely present: an off-origin `fetch()` from the
+page is refused by `connect-src 'none'`. `style-src` keeps `'unsafe-inline'`
+for the 53 inline style attributes that carry the tilt and reveal values, and
+`img-src` keeps `data:` for the runtime grain plate.

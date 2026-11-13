@@ -1,0 +1,80 @@
+name: Pages
+
+# Publishes the design showcase in design/ to GitHub Pages.
+#
+# ONLY design/ is published. The application is deliberately not served from
+# Pages and cannot be: it needs middleware, five route handlers and six server
+# components that read cookies, and — the disqualifying part — Pages cannot send
+# HTTP response headers, so the nonce-based Content-Security-Policy, HSTS and
+# frame-ancestors that spec §11 requires would all be absent. A zero-knowledge
+# vault served without those is not the product. See design/README.md.
+#
+# The artifact is assembled file by file rather than by uploading the repo, so
+# nothing reaches the public URL unless it is named here.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'design/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never let two deploys race; let a newer commit supersede an in-flight one.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Assemble the showcase
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Stage only the runtime files
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          cp design/index.html design/styles.css design/main.js _site/
+          cp -r design/assets _site/assets
+          # Jekyll would otherwise process the output and skip any path that
+          # starts with an underscore.
+          touch _site/.nojekyll
+          # The renderer and the design notes are repository documentation, not
+          # things to serve. Assert they did not come along.
+          test ! -e _site/tools
+          test ! -e _site/CONTRACT.md
+          echo "staged:"; find _site -type f | wc -l; du -sh _site
+
+      - name: Check nothing absolute slipped in
+        run: |
+          set -euo pipefail
+          # A project site is served from /<repo>/, so an absolute path would
+          # 404 in production while working fine locally.
+          if grep -rnoE '(src|href)="/[^"]' _site/index.html; then
+            echo "::error::absolute path in index.html — breaks under the Pages subpath"
+            exit 1
+          fi
+          echo "all references are relative"
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
